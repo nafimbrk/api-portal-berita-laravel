@@ -20,7 +20,16 @@ class PostDetailResource extends JsonResource
             'news_content' => $this->news_content,
             'created_at' => $this->created_at->format('Y-m-d H:i:s'),
             'author_id' => $this->author_id,
-            'author' => $this->whenLoaded('author') // panggil nama fungsi relasi
+            'author' => $this->whenLoaded('author'), // panggil nama fungsi relasi
+            'comments' => $this->whenLoaded('comments', function() {
+                return collect($this->comments)->each(function($comment) {
+                    $comment->commentator;
+                    return $comment;
+                });
+            }),
+            'comment_total' => $this->whenLoaded('comments', function() {
+                return $this->comments->count();
+            })
 
             // lanjutan penjelasan eager loading
             // padahal anggaplah untuk yang post2 fe gk butuh author, pake egaer loading: $this->whenLoaded('author'), maka post2 gk ngembaliin author sedangkan post tetap ngembaliin author, karena yang di show kita memanggil relationship menggunakan with makanya dia kepanggil juga author nya whenLoaded pake eager loading sedangkan show2 kita gk manggil relationship kita gk make method with jadi hasilnya kita juga gk manggil relationship author nya

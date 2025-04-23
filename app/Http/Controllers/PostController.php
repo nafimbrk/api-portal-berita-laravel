@@ -16,12 +16,12 @@ class PostController extends Controller
         // $posts = Post::with('author:id,username')->get();
         // kalo pake loadMissing disini
         // sama aja hasilnya
-        return PostDetailResource::collection($posts->loadMissing('author:id,username'));
+        return PostDetailResource::collection($posts->loadMissing(['author:id,username', 'comments:id,post_id,user_id,comments_content']));
     }
 
     public function show($id) {
         $post = Post::with('author:id,username')->findOrFail($id); // untuk memfilter kolom apa aja yg mau dipanggil (gk boleh spasi dan pk dalam hal ini id harus di ikut sertakan)
-        return new PostDetailResource($post);
+        return new PostDetailResource($post->loadMissing(['author:id,username', 'comments:id,post_id,user_id,comments_content']));
     }
 
     // eager loading pada api resource
