@@ -7,6 +7,7 @@ use App\Http\Resources\PostResource;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
@@ -36,6 +37,17 @@ class PostController extends Controller
             'news_content' => 'required'
         ]);
 
+        $image = null;
+        if ($request->file) {
+            $fileName = $this->generateRandomString();
+            $extension = $request->file->extension();
+            $image = $fileName . '.' . $extension;
+
+            Storage::putFileAs('image', $request->file, $image);
+        }
+
+
+        $request['image'] = $image;
         $request['author_id'] = Auth::user()->id;
         $post = Post::create($request->all());
         return new PostDetailResource($post->loadMissing('author:id,username')); // panggil juga author nya, karena udah bikin relationship whenLoaded di PostDetailResource hanya tinggal panggil
@@ -56,5 +68,17 @@ class PostController extends Controller
         $post = Post::findOrFail($id);
         $post->delete();
         return new PostDetailResource($post->loadMissing('author:id,username'));
+    }
+
+    function generateRandomString($length = 10) {
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $charactersLength = strlen($characters);
+        $randomString = '';
+
+        for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[random_int(0, $charactersLength - 1)];
+        }
+
+        return $randomString;
     }
 }
